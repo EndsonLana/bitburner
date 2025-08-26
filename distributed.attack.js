@@ -7,6 +7,24 @@
  * }} opts
  * @returns {string[]} Sorted list of servers (home excluded by default)
  */
+function indexOfMax(arr) {
+    if (arr.length === 0) {
+        return -1;
+    }
+
+    var max = arr[0];
+    var maxIndex = 0;
+
+    for (var i = 1; i < arr.length; i++) {
+        if (arr[i] > max) {
+            maxIndex = i;
+            max = arr[i];
+        }
+    }
+
+    return maxIndex;
+}
+
 export function getAllServers(ns, opts = {}) {
   const {
     includeHome = false,
@@ -62,19 +80,57 @@ export async function main(ns) {
   });
 
   //ns.tprint(`Found ${servers.length} server(s):\n${servers.join(", ")}`);
+  var serverIndex = 0
+  var serverMaxMoney = []
+  var serverMaxRAM = []
+  var serverHackTime = []
+  var serverGrowTime = []
+  var serverWeakenTime = []
+  var serverMaxThread = []
+  while (serverIndex < servers.length) {
+    serverMaxMoney.push(ns.getServerMaxMoney(servers[serverIndex]))
+    serverMaxRAM.push(ns.getServerMaxRam(servers[serverIndex]))
+    serverMaxThread.push(Math.trunc(ns.getServerMaxRam(servers[serverIndex])/1.75))
+    serverHackTime.push(ns.getHackTime(servers[serverIndex]))
+    serverGrowTime.push(ns.getGrowTime(servers[serverIndex]))
+    serverWeakenTime.push(ns.getWeakenTime(servers[serverIndex]))
+    ns.scp('fragments/hacker.js', servers[serverIndex], 'home')
+    ns.scp('fragments/weakener.js', servers[serverIndex], 'home')
+    ns.scp('fragments/grower.js', servers[serverIndex], 'home')
+    serverIndex = serverIndex + 1
+  }
+
+  var totalThreads = 0
+  for (let i = 0; i < serverMaxThread.length; i++){
+    totalThreads = totalThreads + serverMaxThread
+  }
+  
+  var attackedServerIndex = indexOfMax(serverMaxMoney)
+  var attackedServer = servers[attackedServerIndex]
+
+  var attackedHackTime = serverHackTime[attackedServerIndex]
+  var attackedWeakenTime = serverWeakenTime[attackedServerIndex]
+  var attackedGrowTime = serverGrowTime[attackedServerIndex]
+
+  var weaken2grow = Math.trunc(attackedWeakenTime/attackedGrowTime) + 1
+  var grow2hack = Math.trunc(attackedGrowTime/attackedHackTime) + 1
+  weaken2grow = grow2hack * weaken2grow
+  divisionNum = weaken2grow + grow2hack + 1
+  weakenThreadNum = Math.trunc(weaken2grow/divisionNum * totalThreads)
+  growThreadNum = Math.trunc(grow2hack/divisionNum * totalThreads)
+  hackThreeadNum = Math.trunc(1/divisionNum * totalThreads)
+  
+  while (serverIndex < servers.length) {
+    switch(){
+      case 'weakner': 
+        ns.exec('weakener.js', servers[serverIndex], serverMaxThread[serverIndex] or weakenThreadNum - previousthresds)
+        break
+      case 'grower'
+    }
+    
 
 
-
-
-
-
-
-
-
-
-
-
-
+  }
 
 
 
