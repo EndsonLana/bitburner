@@ -29,15 +29,17 @@ export async function main(ns) {
   var cheapestHacknetSeq = 0
   var cheapestHacknetHardware = 'Level'
   var cheapestCost = 0.0
+  var buyCores = false
+  var tobuyHardware = 'Level'
 
   let i = 0
   while (i < ownHacknet){
-    hacknetData = ns.hacknet.getNodeStats(i)
+    var hacknetData = ns.hacknet.getNodeStats(i)
     var coreNum = hacknetData['cores']
     if (coreNum < 8){
-      buyCores = True
+      buyCores = true
     }else{
-      buyCores = False
+      buyCores = false
     }
 
     var aveLevelCost = ns.hacknet.getLevelUpgradeCost(i,1)/1.5
@@ -76,6 +78,6 @@ export async function main(ns) {
   }
 
   buyHacknet(cheapestHacknetSeq, cheapestHacknetHardware)
-  ns.sleep(1000)
+  ns.sleep(60000 * 0.5)
 }
 
